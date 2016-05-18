@@ -2,66 +2,13 @@ package xyz.marcelo.common;
 
 public class Constants {
 
-	public static final String DATA_FILE_PATH = "/home/marcelovca90/sms-svm/SMSSpamCollection";
+	public static final String DATA_FILE_PATH = "data/SMSSpamCollection";
 
 	public static final int NUMBER_OF_REPEATS = 3;
 
 	// public static final String METRICS_HEADER = "Sw\tLz\tLd\tNf\tCl\tHP\tSP\tHR\tSR\tERR\tACC\tWERR\tWACC\tTCR\tHFM\tSFM\tCT";
 
 	public static final String METRICS_HEADER = "Sw\tLz\tLd\tNf\tCl\tHP\tSP\tHR\tSR\tERR\tACC\tWERR\tWACC\tTCR\tFM\tCT";
-
-	public static final String[][] CONFIGS_BOOK_1 =
-		{
-		//  Sw     Lz   Ld   Nf     Cl
-		{"Yes", "Yes", "1", "128", "NB"},
-		{"No", "Yes", "1", "128", "NB"},
-		{"Yes", "No", "1", "128", "NB"},
-		{"No", "No", "1", "128", "NB"},
-		{"Yes", "Yes", "999", "128", "NB"},
-		{"No", "Yes", "999", "128", "NB"},
-		{"Yes", "No", "999", "128", "NB"},
-		{"No", "No", "999", "128", "NB"},
-		{"Yes", "Yes", "1", "1024", "NB"},
-		{"No", "Yes", "1", "1024", "NB"},
-		{"Yes", "No", "1", "1024", "NB"},
-		{"No", "No", "1", "1024", "NB"},
-		{"Yes", "Yes", "999", "1024", "NB"},
-		{"No", "Yes", "999", "1024", "NB"},
-		{"Yes", "No", "999", "1024", "NB"},
-		{"No", "No", "999", "1024", "NB"},
-		{"Yes", "Yes", "1", "128", "NB"},
-		{"No", "Yes", "1", "128", "NB"},
-		{"Yes", "No", "1", "128", "NB"},
-		{"No", "No", "1", "128", "NB"},
-		{"Yes", "Yes", "999", "128", "NB"},
-		{"No", "Yes", "999", "128", "NB"},
-		{"Yes", "No", "999", "128", "NB"},
-		{"No", "No", "999", "128", "NB"},
-		{"Yes", "Yes", "1", "1024", "NB"},
-		{"No", "Yes", "1", "1024", "NB"},
-		{"Yes", "No", "1", "1024", "NB"},
-		{"No", "No", "1", "1024", "NB"},
-		{"Yes", "Yes", "999", "1024", "NB"},
-		{"No", "Yes", "999", "1024", "NB"},
-		{"Yes", "No", "999", "1024", "NB"},
-		{"No", "No", "999", "1024", "NB"},
-		{"Yes", "Yes", "1", "128", "NB"},
-		{"No", "Yes", "1", "128", "NB"},
-		{"Yes", "No", "1", "128", "NB"},
-		{"No", "No", "1", "128", "NB"},
-		{"Yes", "Yes", "999", "128", "NB"},
-		{"No", "Yes", "999", "128", "NB"},
-		{"Yes", "No", "999", "128", "NB"},
-		{"No", "No", "999", "128", "NB"},
-		{"Yes", "Yes", "1", "1024", "NB"},
-		{"No", "Yes", "1", "1024", "NB"},
-		{"Yes", "No", "1", "1024", "NB"},
-		{"No", "No", "1", "1024", "NB"},
-		{"Yes", "Yes", "999", "1024", "NB"},
-		{"No", "Yes", "999", "1024", "NB"},
-		{"Yes", "No", "999", "1024", "NB"},
-		{"No", "No", "999", "1024", "NB"}
-		};
 
 	public static final String[][] CONFIGS = 
 		{

@@ -23,7 +23,7 @@ public class Main {
 
 		StringProcessor.initialize();
 
-		for (String[] configParams : Constants.CONFIGS_BOOK_1)
+		for (String[] configParams : Constants.CONFIGS)
 		{
 			// 1 - leitura dos parametros da configuracao
 
