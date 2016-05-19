@@ -23,7 +23,7 @@ public class SmsMessage {
 	public void setText(String text) {
 		this.text = text;
 	}
-	
+
 	public LinkedList<String> getWords() {
 		return words;
 	}
