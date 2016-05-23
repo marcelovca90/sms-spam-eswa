@@ -87,95 +87,38 @@ public class StatisticsAggregator {
 	public static void calculate(String config, int NL, int NS, int nss, int nsl, int nll, int nls, int lambda,
 			long classTime) {
 
-		boolean flagNaN = false;
-
 		// ham precision
 		double hamPrecision = (double) (nll) / (double) (nll + nsl);
-		if (Double.isNaN(hamPrecision)) {
-			flagNaN = true;
-		}
 
 		// ham recall
 		double hamRecall = (double) (nll) / (double) (nll + nls);
-		if (Double.isNaN(hamRecall)) {
-			flagNaN = true;
-		}
 
 		// spam precision
 		double spamPrecision = (double) (nss) / (double) (nss + nls);
-		if (Double.isNaN(spamPrecision)) {
-			flagNaN = true;
-		}
 
 		// spam recall
 		double spamRecall = (double) (nss) / (double) (nss + nsl);
-		if (Double.isNaN(spamRecall)) {
-			flagNaN = true;
-		}
 
-		// weighted accuracy
+		// accuracy
 		double acc = (double) (nll + nss) / (double) (NL + NS);
-		if (Double.isNaN(acc)) {
-			flagNaN = true;
-		}
+		
+		// error
 		double err = (double) (nls + nsl) / (double) (NL + NS);
-		if (Double.isNaN(err)) {
-			flagNaN = true;
-		}
+		
+		// weighted accuracy
 		double wAcc = (double) ((lambda * nll) + nss) / (double) ((lambda * NL) + NS);
-		if (Double.isNaN(wAcc)) {
-			flagNaN = true;
-		}
+		
+		// weighted error
 		double wErr = (double) ((lambda * nls) + nsl) / (double) ((lambda * NL) + NS);
-		if (Double.isNaN(wErr)) {
-			flagNaN = true;
-		}
 
 		// total cost ratio
 		double wAcc_b = (double) (lambda * NL) / (double) ((lambda * NL) + NS);
-		if (Double.isNaN(wAcc_b)) {
-			flagNaN = true;
-		}
 		double wErr_b = (double) (lambda * NS) / (double) ((lambda * NL) + NS);
-		if (Double.isNaN(wErr_b)) {
-			flagNaN = true;
-		}
 		double tcr = (wErr_b / wErr);
-		if (Double.isNaN(tcr)) {
-			flagNaN = true;
-		}
 
 		// f-measure
 		double fMeasure = 4.0 * ((hamPrecision * hamRecall * spamPrecision * spamRecall) / (hamPrecision + hamRecall
 				+ spamPrecision + spamRecall));
-		if (Double.isNaN(fMeasure)) {
-			flagNaN = true;
-		}
-
-		if (flagNaN) {
-			System.out.println("!!! NaN FOUND !!!");
-			System.out.println("config = " + config);
-			System.out.println("NL = " + NL);
-			System.out.println("NS = " + NS);
-			System.out.println("nss = " + nss);
-			System.out.println("nsl = " + nsl);
-			System.out.println("nll = " + nll);
-			System.out.println("nls = " + nls);
-			System.out.println("lambda = " + lambda);
-			System.out.println("classTime = " + classTime);
-			System.out.println("hamPrecision = " + hamPrecision);
-			System.out.println("hamRecall = " + hamRecall);
-			System.out.println("spamPrecision = " + spamPrecision);
-			System.out.println("spamRecall = " + spamRecall);
-			System.out.println("acc = " + acc);
-			System.out.println("err = " + err);
-			System.out.println("wAcc = " + wAcc);
-			System.out.println("wErr = " + wErr);
-			System.out.println("wAcc_b = " + wAcc_b);
-			System.out.println("wErr_b = " + wErr_b);
-			System.out.println("tcr = " + tcr);
-			System.out.println("fMeasure = " + fMeasure);
-		}
 
 		if (!results.containsKey(config)) {
 			results.put(config, new LinkedHashMap<String, LinkedList<Double>>());
