@@ -22,202 +22,206 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 
 @SuppressWarnings("unchecked")
-public class StringProcessor {
+public class StringProcessor
+{
+    private static Properties props;
+    private static StanfordCoreNLP pipeline;
+    public static String[] stopWords;
 
-	private static Properties props;
-	private static StanfordCoreNLP pipeline;
-	public static String[] stopWords;
+    public static LinkedList<SmsMessage> readFile(String path) throws IOException
+    {
+        LinkedList<SmsMessage> smsData = new LinkedList<>();
 
-	public static LinkedList<SmsMessage> readFile(String path) throws IOException {
+        File dataFile = new File(path);
+        FileReader fileReader = new FileReader(dataFile);
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
 
-		LinkedList<SmsMessage> smsData = new LinkedList<SmsMessage>();
+        String line;
+        while ((line = bufferedReader.readLine()) != null)
+        {
+            String type = line.substring(0, line.indexOf('\t'));
+            String text = normalizeString(line.substring(line.indexOf('\t') + 1));
+            LinkedList<String> words = splitString(text);
+            smsData.add(new SmsMessage(type, text, words));
+        }
+        bufferedReader.close();
 
-		File dataFile = new File(path);
-		FileReader fileReader = new FileReader(dataFile);
-		BufferedReader bufferedReader = new BufferedReader(fileReader);
+        return smsData;
+    }
 
-		String line;
-		while ((line = bufferedReader.readLine()) != null) {
-			String type = line.substring(0, line.indexOf('\t'));
-			String text = normalizeString(line.substring(line.indexOf('\t') + 1));
-			LinkedList<String> words = splitString(text);
-			smsData.add(new SmsMessage(type, text, words));
-		}
-		;
-		bufferedReader.close();
+    public static void initialize()
+    {
+        // Create StanfordCoreNLP object properties, with POS tagging
+        // (required for lemmatization), and lemmatization
+        props = new Properties();
+        props.put("annotators", "tokenize, ssplit, pos, lemma");
 
-		return smsData;
-	}
+        // StanfordCoreNLP loads a lot of models, so you probably
+        // only want to do this once per execution
+        pipeline = new StanfordCoreNLP(props);
 
-	public static void initialize() {
+        // http://www.ranks.nl/stopwords
+        stopWords = new String[] { "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "arent", "as", "at", "be",
+                "because", "been", "before", "being", "below", "between", "both", "but", "by", "cant", "cannot", "could", "couldnt", "did", "didnt", "do",
+                "does", "doesnt", "doing", "dont", "down", "during", "each", "few", "for", "from", "further", "had", "hadnt", "has", "hasnt", "have", "havent",
+                "having", "he", "hed", "hell", "hes", "her", "here", "heres", "hers", "herself", "him", "himself", "his", "how", "hows", "i", "id", "ill", "im",
+                "ive", "if", "in", "into", "is", "isnt", "it", "its", "its", "itself", "lets", "me", "more", "most", "mustnt", "my", "myself", "no", "nor",
+                "not", "of", "off", "on", "once", "only", "or", "other", "ought", "our", "ours	ourselves", "out", "over", "own", "same", "shant", "she",
+                "shed", "shell", "shes", "should", "shouldnt", "so", "some", "such", "than", "that", "thats", "the", "their", "theirs", "them", "themselves",
+                "then", "there", "theres", "these", "they", "theyd", "theyll", "theyre", "theyve", "this", "those", "through", "to", "too", "under", "until",
+                "up", "very", "was", "wasnt", "we", "wed", "well", "were", "weve", "were", "werent", "what", "whats", "when", "whens", "where", "wheres",
+                "which", "while", "who", "whos", "whom", "why", "whys", "with", "wont", "would", "wouldnt", "you", "youd", "youll", "youre", "youve", "your",
+                "yours", "yourself", "yourselves" };
+    }
 
-		// Create StanfordCoreNLP object properties, with POS tagging
-		// (required for lemmatization), and lemmatization
-		props = new Properties();
-		props.put("annotators", "tokenize, ssplit, pos, lemma");
+    public static HashMap<String, Integer> buildDictionary(LinkedList<SmsMessage> smsData, String type)
+    {
 
-		// StanfordCoreNLP loads a lot of models, so you probably
-		// only want to do this once per execution
-		pipeline = new StanfordCoreNLP(props);
+        HashMap<String, Integer> dictionary = new HashMap<>();
 
-		// http://www.ranks.nl/stopwords
-		stopWords = new String[] { "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any",
-				"are", "arent", "as", "at", "be", "because", "been", "before", "being", "below", "between", "both",
-				"but", "by", "cant", "cannot", "could", "couldnt", "did", "didnt", "do", "does", "doesnt", "doing",
-				"dont", "down", "during", "each", "few", "for", "from", "further", "had", "hadnt", "has", "hasnt",
-				"have", "havent", "having", "he", "hed", "hell", "hes", "her", "here", "heres", "hers", "herself",
-				"him", "himself", "his", "how", "hows", "i", "id", "ill", "im", "ive", "if", "in", "into", "is",
-				"isnt", "it", "its", "its", "itself", "lets", "me", "more", "most", "mustnt", "my", "myself", "no",
-				"nor", "not", "of", "off", "on", "once", "only", "or", "other", "ought", "our", "ours	ourselves",
-				"out", "over", "own", "same", "shant", "she", "shed", "shell", "shes", "should", "shouldnt", "so",
-				"some", "such", "than", "that", "thats", "the", "their", "theirs", "them", "themselves", "then",
-				"there", "theres", "these", "they", "theyd", "theyll", "theyre", "theyve", "this", "those", "through",
-				"to", "too", "under", "until", "up", "very", "was", "wasnt", "we", "wed", "well", "were", "weve",
-				"were", "werent", "what", "whats", "when", "whens", "where", "wheres", "which", "while", "who", "whos",
-				"whom", "why", "whys", "with", "wont", "would", "wouldnt", "you", "youd", "youll", "youre", "youve",
-				"your", "yours", "yourself", "yourselves" };
-	}
+        Iterator<SmsMessage> messageIterator = smsData.iterator();
 
-	public static HashMap<String, Integer> buildDictionary(LinkedList<SmsMessage> smsData, String type) {
+        while (messageIterator.hasNext())
+        {
+            SmsMessage smsMessage = messageIterator.next();
+            if (smsMessage.getType().equalsIgnoreCase(type) || type.equalsIgnoreCase("all"))
+            {
+                String normalizedText = StringProcessor.normalizeString(smsMessage.getText());
+                LinkedList<String> words = StringProcessor.splitString(normalizedText);
+                for (String word : words)
+                {
+                    if (!dictionary.containsKey(word)) dictionary.put(word, 0);
+                    dictionary.put(word, dictionary.get(word) + 1);
+                }
+            }
+        }
 
-		HashMap<String, Integer> dictionary = new HashMap<String, Integer>();
+        return dictionary;
+    }
 
-		Iterator<SmsMessage> messageIterator = smsData.iterator();
+    public static String normalizeString(String text)
+    {
+        String temp = text;
 
-		while (messageIterator.hasNext()) {
-			SmsMessage smsMessage = messageIterator.next();
-			if (smsMessage.getType().equalsIgnoreCase(type) || type.equalsIgnoreCase("all")) {
-				String normalizedText = StringProcessor.normalizeString(smsMessage.getText());
-				LinkedList<String> words = StringProcessor.splitString(normalizedText);
-				for (String word : words) {
-					if (!dictionary.containsKey(word))
-						dictionary.put(word, 0);
-					dictionary.put(word, dictionary.get(word) + 1);
-				}
-			}
-		}
+        // substitui letras acentuadas pelas originais
+        temp = Normalizer.normalize(temp, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
 
-		return dictionary;
-	}
+        // separa todos os numeros e palavras
+        temp = temp.replaceAll("\\d+", " _NUMBER_ ");
 
-	public static String normalizeString(String text) {
+        // remove caracteres estranhos da mensagem
+        temp = temp.replaceAll("[^\\w\\s_]", " ");
 
-		String temp = text;
+        // tira todos os excessos de espaços
+        temp = temp.replaceAll("\\s+", " ").trim().toLowerCase();
 
-		// substitui letras acentuadas pelas originais
-		temp = Normalizer.normalize(temp, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+        return temp;
+    }
 
-		// separa todos os numeros e palavras
-		temp = temp.replaceAll("\\d+", " _NUMBER_ ");
+    public static LinkedList<String> splitString(String text)
+    {
+        LinkedList<String> wordList = new LinkedList<>();
+        for (String word : text.split("\\s+"))
+            if (word != null && !word.isEmpty()) wordList.add(word);
+        return wordList;
+    }
 
-		// remove caracteres estranhos da mensagem
-		temp = temp.replaceAll("[^\\w\\s_]", " ");
+    public static LinkedList<String> lemmatizeString(String text)
+    {
+        LinkedList<String> lemmas = new LinkedList<>();
 
-		// tira todos os excessos de espaços
-		temp = temp.replaceAll("\\s+", " ").trim().toLowerCase();
+        // create an empty Annotation just with the given text
+        Annotation document = new Annotation(text);
 
-		return temp;
-	}
+        // run all Annotators on this text
+        pipeline.annotate(document);
+        // Iterate over all of the sentences found
+        List<CoreMap> sentences = document.get(SentencesAnnotation.class);
+        for (CoreMap sentence : sentences)
+        {
+            // Iterate over all tokens in a sentence
+            for (CoreLabel token : sentence.get(TokensAnnotation.class))
+            {
+                // Retrieve and add the lemma for each word into the
+                // list of lemmas
+                lemmas.add(token.get(LemmaAnnotation.class));
+            }
+        }
+        return lemmas;
+    }
 
-	public static LinkedList<String> splitString(String text) {
+    public static HashMap<String, Integer> lemmatizeDictionary(HashMap<String, Integer> dictionary)
+    {
+        HashMap<String, Integer> clonedDictionary = (HashMap<String, Integer>) dictionary.clone();
+        List<String> toBeRemoved = new ArrayList<>();
+        HashMap<String, Integer> toBeInserted = new HashMap<>();
 
-		LinkedList<String> wordList = new LinkedList<String>();
-		for (String word : text.split("\\s+"))
-			if (word != null && !word.isEmpty())
-				wordList.add(word);
-		return wordList;
-	}
+        for (String word : clonedDictionary.keySet())
+        {
+            String lemma = StringProcessor.lemmatizeString(word).get(0);
+            if (word.compareToIgnoreCase(lemma) != 0)
+            {
+                Integer wordCount = clonedDictionary.get(word);
+                toBeRemoved.add(word);
+                Integer lemmaCount = clonedDictionary.containsKey(lemma) ? clonedDictionary.get(lemma) : 0;
+                toBeInserted.put(lemma, wordCount + lemmaCount);
+            }
+        }
+        for (String word : toBeRemoved)
+            clonedDictionary.remove(word);
+        for (Entry<String, Integer> entry : toBeInserted.entrySet())
+            clonedDictionary.put(entry.getKey(), entry.getValue());
 
-	public static LinkedList<String> lemmatizeString(String text) {
+        return clonedDictionary;
+    }
 
-		LinkedList<String> lemmas = new LinkedList<String>();
+    public static HashMap<String, Integer> removeStopWords(HashMap<String, Integer> dictionary)
+    {
+        HashMap<String, Integer> clonedDictionary = (HashMap<String, Integer>) dictionary.clone();
 
-		// create an empty Annotation just with the given text
-		Annotation document = new Annotation(text);
+        for (String stopWord : stopWords)
+            if (clonedDictionary.containsKey(stopWord)) clonedDictionary.remove(stopWord);
 
-		// run all Annotators on this text
-		pipeline.annotate(document);
-		// Iterate over all of the sentences found
-		List<CoreMap> sentences = document.get(SentencesAnnotation.class);
-		for (CoreMap sentence : sentences) {
-			// Iterate over all tokens in a sentence
-			for (CoreLabel token : sentence.get(TokensAnnotation.class)) {
-				// Retrieve and add the lemma for each word into the
-				// list of lemmas
-				lemmas.add(token.get(LemmaAnnotation.class));
-			}
-		}
-		return lemmas;
-	}
+        return clonedDictionary;
+    }
 
-	public static HashMap<String, Integer> lemmatizeDictionary(HashMap<String, Integer> dictionary) {
+    public static LinkedList<String> getTopWords(HashMap<String, Integer> dictionary, int amount)
+    {
+        HashMap<String, Integer> clonedDictionary = (HashMap<String, Integer>) dictionary.clone();
+        LinkedList<String> topWords = new LinkedList<>();
 
-		HashMap<String, Integer> clonedDictionary = (HashMap<String, Integer>) dictionary.clone();
-		List<String> toBeRemoved = new ArrayList<String>();
-		HashMap<String, Integer> toBeInserted = new HashMap<String, Integer>();
+        for (int i = 0; i < amount; i++)
+        {
+            String tempWord = "";
+            Integer tempMax = Integer.MIN_VALUE;
+            for (Entry<String, Integer> entry : clonedDictionary.entrySet())
+            {
+                if (entry.getValue() > tempMax)
+                {
+                    tempMax = entry.getValue();
+                    tempWord = entry.getKey();
+                }
+            }
+            topWords.add(tempWord);
+            clonedDictionary.remove(tempWord);
+        }
 
-		for (String word : clonedDictionary.keySet()) {
-			String lemma = StringProcessor.lemmatizeString(word).get(0);
-			if (word.compareToIgnoreCase(lemma) != 0) {
-				Integer wordCount = clonedDictionary.get(word);
-				toBeRemoved.add(word);
-				Integer lemmaCount = clonedDictionary.containsKey(lemma) ? clonedDictionary.get(lemma) : 0;
-				toBeInserted.put(lemma, wordCount + lemmaCount);
-			}
-		}
-		for (String word : toBeRemoved)
-			clonedDictionary.remove(word);
-		for (Entry<String, Integer> entry : toBeInserted.entrySet())
-			clonedDictionary.put(entry.getKey(), entry.getValue());
+        return topWords;
+    }
 
-		return clonedDictionary;
-	}
+    public static LinkedList<SmsMessage> shuffle(LinkedList<SmsMessage> list)
+    {
+        LinkedList<SmsMessage> clonedList = (LinkedList<SmsMessage>) list.clone();
+        SmsMessage backup;
 
-	public static HashMap<String, Integer> removeStopWords(HashMap<String, Integer> dictionary) {
+        for (int i = clonedList.size() - 1; i >= 1; i--)
+        {
+            int j = (int) (Math.random() * (i));
+            backup = clonedList.get(i);
+            clonedList.set(i, clonedList.get(j));
+            clonedList.set(j, backup);
+        }
 
-		HashMap<String, Integer> clonedDictionary = (HashMap<String, Integer>) dictionary.clone();
-
-		for (String stopWord : stopWords)
-			if (clonedDictionary.containsKey(stopWord))
-				clonedDictionary.remove(stopWord);
-
-		return clonedDictionary;
-	}
-
-	public static LinkedList<String> getTopWords(HashMap<String, Integer> dictionary, int amount) {
-
-		HashMap<String, Integer> clonedDictionary = (HashMap<String, Integer>) dictionary.clone();
-		LinkedList<String> topWords = new LinkedList<String>();
-
-		for (int i = 0; i < amount; i++) {
-			String tempWord = "";
-			Integer tempMax = Integer.MIN_VALUE;
-			for (Entry<String, Integer> entry : clonedDictionary.entrySet()) {
-				if (entry.getValue() > tempMax) {
-					tempMax = entry.getValue();
-					tempWord = entry.getKey();
-				}
-			}
-			topWords.add(tempWord);
-			clonedDictionary.remove(tempWord);
-		}
-
-		return topWords;
-	}
-
-	public static LinkedList<SmsMessage> shuffle(LinkedList<SmsMessage> list) {
-
-		LinkedList<SmsMessage> clonedList = (LinkedList<SmsMessage>) list.clone();
-		SmsMessage backup;
-
-		for (int i = clonedList.size() - 1; i >= 1; i--) {
-			int j = (int) (Math.random() * ((double) i));
-			backup = clonedList.get(i);
-			clonedList.set(i, clonedList.get(j));
-			clonedList.set(j, backup);
-		}
-
-		return clonedList;
-	}
-
+        return clonedList;
+    }
 }

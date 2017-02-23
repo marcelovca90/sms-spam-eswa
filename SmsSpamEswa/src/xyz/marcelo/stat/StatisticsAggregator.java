@@ -14,16 +14,14 @@ import xyz.marcelo.ml.BayesianClassifier;
 
 public class StatisticsAggregator
 {
+    private static LinkedHashMap<String, LinkedHashMap<String, LinkedList<Double>>> results = new LinkedHashMap<>();
 
-    private static LinkedHashMap<String, LinkedHashMap<String, LinkedList<Double>>> results = new LinkedHashMap<String, LinkedHashMap<String, LinkedList<Double>>>();
-
-    private static HashSet<String> alreadyPrinted = new HashSet<String>();
+    private static HashSet<String> alreadyPrinted = new HashSet<>();
 
     private static StringBuffer buffer = new StringBuffer();
 
     public static void evaluate(String config, BayesianClassifier bc, String[] samples, String[] types, int lambda)
     {
-
         int NL = 0, NS = 0;
         int nss = 0, nsl = 0, nll = 0, nls = 0;
         long classTime = 0;
@@ -44,7 +42,8 @@ public class StatisticsAggregator
                     nll++;
                 else
                     nls++;
-            } else
+            }
+            else
             {
                 NS++;
                 if (Double.compare(chance, 0.5) >= 0)
@@ -59,7 +58,6 @@ public class StatisticsAggregator
 
     public static void evaluate(String config, SVM svm, MLDataSet testSet, int lambda)
     {
-
         int NL = 0, NS = 0;
         int nss = 0, nsl = 0, nll = 0, nls = 0;
         long classTime = 0;
@@ -80,7 +78,8 @@ public class StatisticsAggregator
                     nll++;
                 else
                     nls++;
-            } else
+            }
+            else
             {
                 NS++;
                 if (outputClass == 0)
@@ -93,10 +92,8 @@ public class StatisticsAggregator
         calculate(config, NL, NS, nss, nsl, nll, nls, lambda, classTime);
     }
 
-    public static void calculate(String config, int NL, int NS, int nss, int nsl, int nll, int nls, int lambda,
-            long classTime)
+    public static void calculate(String config, int NL, int NS, int nss, int nsl, int nll, int nls, int lambda, long classTime)
     {
-
         // ham precision
         double hamPrecision = (double) (nll) / (double) (nll + nsl);
 
@@ -128,8 +125,7 @@ public class StatisticsAggregator
         double tcr = (wErr_b / wErr);
 
         // f-measure
-        double fMeasure = 4.0 * ((hamPrecision * hamRecall * spamPrecision * spamRecall)
-                / (hamPrecision + hamRecall + spamPrecision + spamRecall));
+        double fMeasure = 4.0 * ((hamPrecision * hamRecall * spamPrecision * spamRecall) / (hamPrecision + hamRecall + spamPrecision + spamRecall));
 
         if (!results.containsKey(config))
         {
@@ -162,7 +158,6 @@ public class StatisticsAggregator
 
     public static void report()
     {
-
         if (!alreadyPrinted.contains(Constants.METRICS_HEADER))
         {
             System.out.println(Constants.METRICS_HEADER);
@@ -189,5 +184,4 @@ public class StatisticsAggregator
             buffer.setLength(0);
         }
     }
-
 }

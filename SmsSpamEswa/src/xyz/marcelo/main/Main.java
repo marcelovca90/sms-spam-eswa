@@ -12,93 +12,91 @@ import xyz.marcelo.ml.HelperNB;
 import xyz.marcelo.ml.HelperSVM;
 import xyz.marcelo.stat.StatisticsAggregator;
 
-public class Main {
+public class Main
+{
+    public static void main(String[] args) throws Exception
+    {
+        // 0 - inicializacao do processador de strings
 
-	public static void main(String[] args) throws Exception {
+        StringProcessor.initialize();
 
-		// 0 - inicializacao do processador de strings
+        for (String[] configParams : Constants.CONFIGS)
+        {
+            // 1 - leitura dos parametros da configuracao
 
-		StringProcessor.initialize();
+            String config = String.format("%s\t%s\t%s\t%s\t%s", configParams[0], configParams[1], configParams[2], configParams[3], configParams[4]);
 
-		for (String[] configParams : Constants.CONFIGS) {
-			// 1 - leitura dos parametros da configuracao
+            boolean Sw = configParams[0].equalsIgnoreCase("yes");
+            boolean Lz = configParams[1].equalsIgnoreCase("yes");
+            int Ld = Integer.parseInt(configParams[2]);
+            int Nf = Integer.parseInt(configParams[3]);
+            String Cl = configParams[4].toUpperCase();
 
-			String config = String.format("%s\t%s\t%s\t%s\t%s", configParams[0], configParams[1], configParams[2],
-					configParams[3], configParams[4]);
+            // 2 - leitura do data set (arquivo) e construcao da lista de mensagens
 
-			boolean Sw = configParams[0].equalsIgnoreCase("yes");
-			boolean Lz = configParams[1].equalsIgnoreCase("yes");
-			int Ld = Integer.parseInt(configParams[2]);
-			int Nf = Integer.parseInt(configParams[3]);
-			String Cl = configParams[4].toUpperCase();
+            LinkedList<SmsMessage> smsData = StringProcessor.readFile(Constants.DATA_FILE_PATH);
 
-			// 2 - leitura do data set (arquivo) e construcao da lista de
-			// mensagens
+            for (int batch = 0; batch < Constants.NUMBER_OF_REPEATS; batch++)
+            {
+                // 3 - embaralhamento a lista de mensagens
 
-			LinkedList<SmsMessage> smsData = StringProcessor.readFile(Constants.DATA_FILE_PATH);
+                smsData = StringProcessor.shuffle(smsData);
 
-			for (int batch = 0; batch < Constants.NUMBER_OF_REPEATS; batch++) {
-				// 3 - embaralhamento a lista de mensagens
+                // 4.1 - construcao do conjunto de treinamento
 
-				smsData = StringProcessor.shuffle(smsData);
+                LinkedList<SmsMessage> trainSmsData = new LinkedList<>();
+                for (int i = 0; i < 70 * smsData.size() / 100; i++)
+                    trainSmsData.add(smsData.get(i));
 
-				// 4.1 - construcao do conjunto de treinamento
+                HashMap<String, Integer> trainHamDictionary = StringProcessor.buildDictionary(trainSmsData, "ham");
+                HashMap<String, Integer> trainSpamDictionary = StringProcessor.buildDictionary(trainSmsData, "spam");
+                HashMap<String, Integer> trainTotalDictionary = StringProcessor.buildDictionary(trainSmsData, "all");
 
-				LinkedList<SmsMessage> trainSmsData = new LinkedList<SmsMessage>();
-				for (int i = 0; i < 70 * smsData.size() / 100; i++)
-					trainSmsData.add(smsData.get(i));
+                // 4.2 - construcao do conjunto de teste
 
-				HashMap<String, Integer> trainHamDictionary = StringProcessor.buildDictionary(trainSmsData, "ham");
-				HashMap<String, Integer> trainSpamDictionary = StringProcessor.buildDictionary(trainSmsData, "spam");
-				HashMap<String, Integer> trainTotalDictionary = StringProcessor.buildDictionary(trainSmsData, "all");
+                LinkedList<SmsMessage> testSmsData = new LinkedList<>();
+                for (int i = 70 * smsData.size() / 100; i < smsData.size(); i++)
+                    testSmsData.add(smsData.get(i));
 
-				// 4.2 - construcao do conjunto de teste
+                if (Sw) // 5 - retirada das stop-words
+                {
+                    trainHamDictionary = StringProcessor.removeStopWords(trainHamDictionary);
+                    trainSpamDictionary = StringProcessor.removeStopWords(trainSpamDictionary);
+                    trainTotalDictionary = StringProcessor.removeStopWords(trainTotalDictionary);
+                }
 
-				LinkedList<SmsMessage> testSmsData = new LinkedList<SmsMessage>();
-				for (int i = 70 * smsData.size() / 100; i < smsData.size(); i++)
-					testSmsData.add(smsData.get(i));
+                if (Lz) // 6 - aplicacao da lematizacao
+                        // (http://stanfordnlp.github.io/CoreNLP/)
+                {
+                    trainHamDictionary = StringProcessor.lemmatizeDictionary(trainHamDictionary);
+                    trainSpamDictionary = StringProcessor.lemmatizeDictionary(trainSpamDictionary);
+                    trainTotalDictionary = StringProcessor.lemmatizeDictionary(trainTotalDictionary);
+                }
 
-				if (Sw) // 5 - retirada das stop-words
-				{
-					trainHamDictionary = StringProcessor.removeStopWords(trainHamDictionary);
-					trainSpamDictionary = StringProcessor.removeStopWords(trainSpamDictionary);
-					trainTotalDictionary = StringProcessor.removeStopWords(trainTotalDictionary);
-				}
+                // 7 - geracao das listas das palavras mais comuns
 
-				if (Lz) // 6 - aplicacao da lematizacao
-						// (http://stanfordnlp.github.io/CoreNLP/)
-				{
-					trainHamDictionary = StringProcessor.lemmatizeDictionary(trainHamDictionary);
-					trainSpamDictionary = StringProcessor.lemmatizeDictionary(trainSpamDictionary);
-					trainTotalDictionary = StringProcessor.lemmatizeDictionary(trainTotalDictionary);
-				}
+                LinkedList<String> trainHamTopWords = StringProcessor.getTopWords(trainHamDictionary, Nf);
+                LinkedList<String> trainSpamTopWords = StringProcessor.getTopWords(trainSpamDictionary, Nf);
+                LinkedList<String> trainTotalTopWords = StringProcessor.getTopWords(trainTotalDictionary, Nf);
 
-				// 7 - geracao das listas das palavras mais comuns
+                // 8 - execucao da tecnica (treinamento e teste)
 
-				LinkedList<String> trainHamTopWords = StringProcessor.getTopWords(trainHamDictionary, Nf);
-				LinkedList<String> trainSpamTopWords = StringProcessor.getTopWords(trainSpamDictionary, Nf);
-				LinkedList<String> trainTotalTopWords = StringProcessor.getTopWords(trainTotalDictionary, Nf);
+                switch (Cl)
+                {
+                    case "NB":
+                        HelperNB.run(config, Ld, Nf, trainSmsData, testSmsData, trainHamTopWords, trainSpamTopWords, trainTotalTopWords);
+                        break;
+                    case "SVM":
+                        HelperSVM.run(config, Ld, Nf, trainSmsData, testSmsData, trainHamTopWords, trainSpamTopWords, trainTotalTopWords);
+                        break;
+                }
+            }
 
-				// 8 - execucao da tecnica (treinamento e teste)
+            // 9 - reportando estatisticas
+            StatisticsAggregator.report();
+        }
 
-				switch (Cl) {
-				case "NB":
-					HelperNB.run(config, Ld, Nf, trainSmsData, testSmsData, trainHamTopWords, trainSpamTopWords,
-							trainTotalTopWords);
-					break;
-				case "SVM":
-					HelperSVM.run(config, Ld, Nf, trainSmsData, testSmsData, trainHamTopWords, trainSpamTopWords,
-							trainTotalTopWords);
-					break;
-				}
-			}
-
-			// 9 - reportando estatisticas
-			StatisticsAggregator.report();
-		}
-
-		// 10 - desligando a instancia do encog
-		Encog.getInstance().shutdown();
-	}
-
+        // 10 - desligando a instancia do encog
+        Encog.getInstance().shutdown();
+    }
 }
