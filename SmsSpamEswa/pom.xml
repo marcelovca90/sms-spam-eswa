@@ -5,6 +5,7 @@
     <artifactId>SmsSpamEswa</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>SmsSpamEswa</name>
+    <description>SmsSpamEswa</description>
     <build>
         <sourceDirectory>src</sourceDirectory>
     </build>
@@ -26,5 +27,8 @@
             <classifier>models</classifier>
         </dependency>
     </dependencies>
-    <description>SmsSpamEswa</description>
+    <properties>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+    </properties>
 </project>
