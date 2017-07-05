@@ -19,12 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package xyz.marcelo.ml;
+package io.github.marcelovca90.ml;
 
 import java.util.LinkedList;
 
-import xyz.marcelo.data.SmsMessage;
-import xyz.marcelo.stat.StatisticsAggregator;
+import io.github.marcelovca90.data.SmsMessage;
+import io.github.marcelovca90.stat.StatisticsAggregator;
 
 public class HelperNB
 {

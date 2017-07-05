@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package xyz.marcelo.data;
+package io.github.marcelovca90.data;
 
 import java.io.BufferedReader;
 import java.io.File;

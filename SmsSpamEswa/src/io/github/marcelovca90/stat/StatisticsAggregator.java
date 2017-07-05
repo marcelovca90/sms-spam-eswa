@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package xyz.marcelo.stat;
+package io.github.marcelovca90.stat;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -30,8 +30,8 @@ import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.svm.SVM;
 
-import xyz.marcelo.common.Constants;
-import xyz.marcelo.ml.BayesianClassifier;
+import io.github.marcelovca90.common.Constants;
+import io.github.marcelovca90.ml.BayesianClassifier;
 
 public class StatisticsAggregator
 {
